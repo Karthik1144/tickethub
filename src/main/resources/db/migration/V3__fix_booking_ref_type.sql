@@ -1,0 +1,1 @@
+ALTER TABLE bookings MODIFY COLUMN booking_ref VARCHAR(12) NOT NULL;
