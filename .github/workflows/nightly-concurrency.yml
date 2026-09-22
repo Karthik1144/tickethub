@@ -1,0 +1,40 @@
+name: Nightly concurrency soak
+
+# Doc 06 exit criterion: the concurrency suite must pass repeatedly, not once.
+# A race condition that fails 1 run in 20 is still a double-booking bug.
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run SeatHoldConcurrencyTest 8 times
+        run: |
+          for i in $(seq 1 8); do
+            echo "::group::iteration $i"
+            mvn -B -ntp -q test -Dtest=SeatHoldConcurrencyTest || { echo "FAILED on iteration $i"; exit 1; }
+            echo "::endgroup::"
+          done
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-surefire-reports
+          path: target/surefire-reports
