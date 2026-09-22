@@ -1,0 +1,27 @@
+:root {
+  --bg: #0f1216; --panel: #171c23; --line: #2a323d;
+  --text: #e8edf4; --muted: #94a3b8; --accent: #4f9cf9;
+  --available: #2f3a46; --selected: #4f9cf9; --held: #7c5c1f; --booked: #4a2b2b;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); }
+.wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+button { background: var(--accent); color: #05121f; border: 0; border-radius: 8px; padding: 9px 14px; font-weight: 600; cursor: pointer; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+input { background: #0c1015; border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 9px 11px; width: 100%; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.muted { color: var(--muted); font-size: 13px; }
+.screen { text-align: center; padding: 6px; margin: 10px 0 18px; border-radius: 6px; background: #10151b; border: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.seat-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; }
+.seat { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: var(--available); color: var(--text); font-size: 11px; cursor: pointer; }
+.seat.selected { background: var(--selected); color: #05121f; }
+.seat.HELD { background: var(--held); cursor: not-allowed; }
+.seat.BOOKED { background: var(--booked); cursor: not-allowed; }
+.error { color: #ff9c9c; font-size: 13px; }
+.legend { display: flex; gap: 14px; justify-content: center; margin-top: 12px; }
+.swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 5px; vertical-align: -1px; }
