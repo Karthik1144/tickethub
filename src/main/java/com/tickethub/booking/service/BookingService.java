@@ -1,5 +1,4 @@
 package com.tickethub.booking.service;
-
 import com.tickethub.booking.domain.Booking;
 import com.tickethub.booking.domain.BookingItem;
 import com.tickethub.booking.domain.BookingStatus;
@@ -14,8 +13,6 @@ import com.tickethub.payment.service.PaymentService;
 import com.tickethub.user.domain.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,8 +61,10 @@ public class BookingService {
         for (int attempt = 1; attempt <= MAX_HOLD_ATTEMPTS; attempt++) {
             try {
                 return transactions.createHold(userId, showId, request.seatIds());
-            } catch (DeadlockLoserDataAccessException | CannotAcquireLockException
-                     | PessimisticLockingFailureException ex) {
+            } catch (PessimisticLockingFailureException ex) {
+                // Covers CannotAcquireLockException and DeadlockLoserDataAccessException,
+                // both of which are subclasses of this type -- catching them separately
+                // is redundant and Java rejects it as an illegal multi-catch.
                 last = ex;
                 log.warn("Lock contention on hold (show {}, attempt {}/{})", showId, attempt, MAX_HOLD_ATTEMPTS);
                 sleepBackoff(attempt);
