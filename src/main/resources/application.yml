@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: tickethub
+  datasource:
+    # DB_* wins; otherwise the MYSQL* variables that Railway/most hosts inject; otherwise local defaults.
+    url: "${DB_URL:jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:tickethub}?useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&serverTimezone=UTC}"
+    username: "${DB_USER:${MYSQLUSER:tickethub}}"
+    password: "${DB_PASSWORD:${MYSQLPASSWORD:tickethub}}"
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 10000
+      # Same isolation everywhere (docker-compose sets it server-side, managed MySQL does not).
+      # READ COMMITTED avoids gap locks on the seat-hold path.
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  jackson:
+    default-property-inclusion: non_null
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  port: ${PORT:${SERVER_PORT:8080}}      # hosts such as Railway inject PORT
+  forward-headers-strategy: framework   # trust X-Forwarded-* from the platform's TLS proxy
+  error:
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.tickethub: INFO
+
+tickethub:
+  jwt:
+    secret: ${JWT_SECRET:change-me-in-production-this-must-be-at-least-32-bytes-long!!}
+    access-token-minutes: 15
+    refresh-token-days: 7
+    issuer: tickethub
+  booking:
+    hold-minutes: 5
+    max-seats-per-booking: 6
+    cancellation-cutoff-hours: 2
+  scheduler:
+    hold-expiry-cron: "0/30 * * * * *"
+    batch-size: 100
+  payment:
+    gateway: MOCK
+    currency: INR
+    webhook-secret: ${PAYMENT_WEBHOOK_SECRET:test-webhook-secret}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  ratelimit:
+    login-per-minute: 10
+    hold-per-minute: 30

@@ -1,0 +1,32 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+tickethub:
+  jwt:
+    secret: test-secret-key-that-is-long-enough-for-hs256-algorithm!!
+    access-token-minutes: 15
+    refresh-token-days: 7
+    issuer: tickethub-test
+  booking:
+    hold-minutes: 5
+    max-seats-per-booking: 6
+    cancellation-cutoff-hours: 2
+  scheduler:
+    hold-expiry-cron: "-"
+    batch-size: 100
+  payment:
+    gateway: MOCK
+    currency: INR
+    webhook-secret: test-webhook-secret
+  cors:
+    allowed-origins: http://localhost:5173
+  ratelimit:
+    login-per-minute: 1000
+    hold-per-minute: 1000
+logging:
+  level:
+    com.tickethub: INFO
