@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.net.URI;
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpHeaders headers,
             HttpStatusCode status,
-            HttpServletRequest request) {
+            WebRequest request) {
         Map<String, String> fields = ex.getBindingResult().getFieldErrors().stream()
                 .collect(Collectors.toMap(f -> f.getField(),
                                           f -> f.getDefaultMessage() == null ? "invalid" : f.getDefaultMessage(),
