@@ -74,8 +74,8 @@ export default function AuthPage({ mode = 'login', onAuthenticated, onNavigate, 
           fullName: fullName.trim(),
           phone: phone.trim() || null,
         });
-        setMessage('Account created successfully. Sign in to continue.');
         switchMode('login');
+        setMessage('Account created successfully. Sign in to continue.');
         return;
       }
 
