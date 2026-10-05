@@ -29,6 +29,7 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
   const [eventForm, setEventForm] = useState(initialEvent);
   const [hallForm, setHallForm] = useState(initialHall);
   const [showForm, setShowForm] = useState(initialShow);
+  const [hallVenueId, setHallVenueId] = useState('');
   const [showId, setShowId] = useState('');
   const [occupancy, setOccupancy] = useState(null);
   const [message, setMessage] = useState(null);
@@ -53,8 +54,10 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
     load();
   }, []);
 
-  const loadHalls = async (venueId) => {
-    setShowForm((current) => ({ ...current, venueId, hallId: '' }));
+  const loadHalls = async (venueId, updateShowVenue = false) => {
+    if (updateShowVenue) {
+      setShowForm((current) => ({ ...current, venueId, hallId: '' }));
+    }
     if (!venueId) {
       setHalls([]);
       return;
@@ -94,7 +97,7 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
   ).then(() => setEventForm(initialEvent));
 
   const createHall = () => submit(
-    () => api.adminCreateHall(showForm.venueId, {
+    () => api.adminCreateHall(hallVenueId, {
       ...hallForm,
       rows: Number(hallForm.rows),
       seatsPerRow: Number(hallForm.seatsPerRow),
@@ -102,7 +105,7 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
     'Hall created and seats generated.',
   ).then(async () => {
     setHallForm(initialHall);
-    await loadHalls(showForm.venueId);
+    await loadHalls(hallVenueId);
   });
 
   const scheduleShow = () => submit(
@@ -191,7 +194,10 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
             <div><span className="eyebrow">HALLS</span><h2>Create hall</h2></div>
           </div>
           <div className="admin-form-grid">
-            <select value={showForm.venueId} onChange={(e) => loadHalls(e.target.value)}>
+            <select value={hallVenueId} onChange={(e) => {
+              setHallVenueId(e.target.value);
+              loadHalls(e.target.value);
+            }}>
               <option value="">Select venue</option>
               {venues.map((venue) => <option key={venue.id} value={venue.id}>{venue.name} · {venue.city}</option>)}
             </select>
@@ -199,7 +205,7 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
             <input type="number" min="1" max="26" value={hallForm.rows} onChange={(e) => setHallForm({ ...hallForm, rows: e.target.value })} placeholder="Rows" />
             <input type="number" min="1" max="60" value={hallForm.seatsPerRow} onChange={(e) => setHallForm({ ...hallForm, seatsPerRow: e.target.value })} placeholder="Seats / row" />
           </div>
-          <button className="primary-button" type="button" disabled={busy || !showForm.venueId || !hallForm.name.trim()} onClick={createHall}>Create hall</button>
+          <button className="primary-button" type="button" disabled={busy || !hallVenueId || !hallForm.name.trim()} onClick={createHall}>Create hall</button>
         </div>
 
         <div className="admin-card">
@@ -211,7 +217,7 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
               <option value="">Select event</option>
               {events.map((event) => <option key={event.id} value={event.id}>{event.title}</option>)}
             </select>
-            <select value={showForm.venueId} onChange={(e) => loadHalls(e.target.value)}>
+            <select value={showForm.venueId} onChange={(e) => loadHalls(e.target.value, true)}>
               <option value="">Select venue</option>
               {venues.map((venue) => <option key={venue.id} value={venue.id}>{venue.name} · {venue.city}</option>)}
             </select>
