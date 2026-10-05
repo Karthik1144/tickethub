@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -37,7 +38,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .collect(Collectors.toMap(f -> f.getField(),
                                           f -> f.getDefaultMessage() == null ? "invalid" : f.getDefaultMessage(),
                                           (a, b) -> a, LinkedHashMap::new));
-        ProblemDetail pd = base(ErrorCode.VALIDATION_FAILED, "Request contains invalid fields", request);
+        HttpServletRequest servletRequest = request instanceof ServletWebRequest swr ? swr.getRequest() : null;
+        ProblemDetail pd = base(ErrorCode.VALIDATION_FAILED, "Request contains invalid fields", servletRequest);
         pd.setProperty("fields", fields);
         return new ResponseEntity<>(pd, headers, ErrorCode.VALIDATION_FAILED.getStatus());
     }
