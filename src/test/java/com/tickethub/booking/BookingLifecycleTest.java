@@ -172,6 +172,8 @@ class BookingLifecycleTest extends AbstractIntegrationTest {
     @DisplayName("FR-BOOK-07: cancelling a confirmed booking frees the seats and refunds")
     void cancelConfirmedBookingReleasesSeats() {
         Show show = fixtures.showWithSeats(1, 3, new BigDecimal("120.00"));
+        show.setStartTime(Instant.now().plusSeconds(3 * 60 * 60));
+        show.setEndTime(Instant.now().plusSeconds(6 * 60 * 60));
         User user = fixtures.randomUser();
         HoldResponse hold = bookingService.holdSeats(user.getId(), show.getId(),
                 new HoldRequest(fixtures.seatIdsOf(show.getId()).subList(0, 2)));
