@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api, setTokens } from './api.js';
+import './auth-admin.css';
 
 function validateForm({ mode, email, password, confirmPassword, fullName, phone }) {
   const errors = {};
