@@ -22,6 +22,18 @@ public class AdminCatalogueController {
         this.catalogueService = catalogueService;
     }
 
+    @GetMapping("/venues")
+    @Operation(summary = "List venues for administration")
+    public java.util.List<VenueResponse> listVenues() {
+        return catalogueService.listVenues();
+    }
+
+    @GetMapping("/venues/{venueId}/halls")
+    @Operation(summary = "List halls for a venue")
+    public java.util.List<HallResponse> listHalls(@PathVariable Long venueId) {
+        return catalogueService.listHalls(venueId);
+    }
+
     @PostMapping("/venues")
     @Operation(summary = "Create a venue")
     public ResponseEntity<VenueResponse> createVenue(@Valid @RequestBody CreateVenueRequest request) {

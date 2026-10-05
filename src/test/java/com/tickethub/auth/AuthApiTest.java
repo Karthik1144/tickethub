@@ -147,6 +147,20 @@ class AuthApiTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.fields.password").exists());
     }
 
+    @Test
+    @DisplayName("a password without complexity requirements fails validation")
+    void weakPasswordRejected() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "weak-" + UUID.randomUUID() + "@example.com",
+                                "password", "password123",
+                                "fullName", "Weak Password"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.fields.password").exists());
+    }
+
     private org.springframework.test.web.servlet.ResultActions register(String email) throws Exception {
         return mockMvc.perform(post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)

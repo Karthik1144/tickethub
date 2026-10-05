@@ -49,19 +49,33 @@ public class CatalogueService {
 
     // ---------- admin: venues and halls ----------
 
+    @Transactional(readOnly = true)
+    public List<VenueResponse> listVenues() {
+        return venueRepository.findAll().stream()
+                .map(v -> new VenueResponse(v.getId(), v.getName(), v.getCity(), v.getAddress()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<HallResponse> listHalls(Long venueId) {
+        venueRepository.findById(venueId).orElseThrow(() -> ApiException.notFound("Venue"));
+        return hallRepository.findByVenueId(venueId).stream()
+                .map(h -> new HallResponse(h.getId(), venueId, h.getName(), h.getTotalSeats()))
+                .toList();
+    }
+
     @Transactional
     public VenueResponse createVenue(CreateVenueRequest request) {
-        Venue venue = venueRepository.save(new Venue(request.name(), request.city(), request.address()));
+        Venue venue = venueRepository.save(new Venue(request.name().trim(), request.city().trim(), request.address()));
         return new VenueResponse(venue.getId(), venue.getName(), venue.getCity(), venue.getAddress());
     }
 
-    /** Creates a hall and generates its seat layout in one transaction (batched inserts). */
     @Transactional
     public HallResponse createHall(Long venueId, CreateHallRequest request) {
         Venue venue = venueRepository.findById(venueId).orElseThrow(() -> ApiException.notFound("Venue"));
 
         int total = request.rows() * request.seatsPerRow();
-        Hall hall = hallRepository.save(new Hall(venue, request.name(), total));
+        Hall hall = hallRepository.save(new Hall(venue, request.name().trim(), total));
 
         Map<String, SeatType> typeByRow = request.seatTypeByRow() == null ? Map.of() : request.seatTypeByRow();
         List<Seat> seats = new ArrayList<>(total);
@@ -80,15 +94,20 @@ public class CatalogueService {
 
     @Transactional
     public EventResponse createEvent(CreateEventRequest request) {
-        Event event = eventRepository.save(new Event(request.title(), request.description(),
-                request.category(), request.language(), request.durationMin(), request.posterUrl()));
+        Event event = eventRepository.save(new Event(
+                request.title().trim(),
+                request.description(),
+                request.category(),
+                request.language(),
+                request.durationMin(),
+                request.posterUrl()));
         return toEventResponse(event);
     }
 
     @Transactional
     public EventResponse updateEvent(Long eventId, CreateEventRequest request) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> ApiException.notFound("Event"));
-        event.setTitle(request.title());
+        event.setTitle(request.title().trim());
         event.setDescription(request.description());
         event.setCategory(request.category());
         event.setLanguage(request.language());
@@ -106,10 +125,6 @@ public class CatalogueService {
 
     // ---------- admin: shows ----------
 
-    /**
-     * Schedules a show and generates its ShowSeat rows.
-     * Overlapping shows in the same hall are rejected (FR-CAT-03).
-     */
     @Transactional
     public ShowCreatedResponse scheduleShow(CreateShowRequest request) {
         Event event = eventRepository.findById(request.eventId())
