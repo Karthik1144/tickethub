@@ -73,7 +73,7 @@ public class TestDataFactory {
         Event event = eventRepository.save(new Event("Event " + UUID.randomUUID(), "desc",
                 EventCategory.CONCERT, "English", (short) 120, null));
 
-        Instant start = Instant.now().plus(Duration.ofHours(3));
+        Instant start = Instant.now().plus(Duration.ofHours(2));
         Show show = showRepository.save(new Show(event, hall, start, start.plus(Duration.ofHours(3)), price));
 
         List<ShowSeat> showSeats = seats.stream().map(s -> new ShowSeat(show, s, price)).toList();
