@@ -1,11 +1,32 @@
 # TicketHub
 
-![CI](https://github.com/<you>/tickethub/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Karthik1144/tickethub/actions/workflows/ci.yml/badge.svg)
 
 Ticket booking platform: **Java 21 · Spring Boot 3 · Spring Data JPA · MySQL 8 · React**.
 
 JWT authentication, live seat allocation, and secure payment integration, built so that
 a seat can never be sold twice and the booking path stays fast under contention.
+
+---
+
+## Live demo
+
+**Frontend:** https://tickethub-3rr1.vercel.app
+
+**Backend API:** https://tickethub-production-3863.up.railway.app
+
+**Swagger UI:** https://tickethub-production-3863.up.railway.app/swagger-ui.html
+
+The deployed portfolio demo uses seeded catalogue data and mock payments.
+
+Demo logins:
+
+```text
+Admin: admin@tickethub.dev / Admin123!
+User:  user@tickethub.dev  / User1234!
+```
+
+> This deployment uses the project's mock payment gateway. It is for demonstration only, not real-money transactions.
 
 ---
 
