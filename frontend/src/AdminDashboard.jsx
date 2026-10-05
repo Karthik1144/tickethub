@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api.js';
+import './auth-admin.css';
 
 const CATEGORIES = ['MOVIE', 'CONCERT', 'SPORTS', 'THEATRE'];
 
