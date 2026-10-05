@@ -55,7 +55,7 @@ public class TestDataFactory {
         return user("user-" + UUID.randomUUID() + "@example.com", Role.USER);
     }
 
-    /** A show in a fresh hall with rows x seatsPerRow AVAILABLE seats, starting in 2 hours. */
+    /** A show in a fresh hall with rows x seatsPerRow AVAILABLE seats, starting safely beyond the cancellation cutoff. */
     @Transactional
     public Show showWithSeats(int rows, int seatsPerRow, BigDecimal price) {
         Venue venue = venueRepository.save(new Venue("Arena " + UUID.randomUUID(), "Vijayawada", "Main road"));
@@ -73,7 +73,7 @@ public class TestDataFactory {
         Event event = eventRepository.save(new Event("Event " + UUID.randomUUID(), "desc",
                 EventCategory.CONCERT, "English", (short) 120, null));
 
-        Instant start = Instant.now().plus(Duration.ofHours(2));
+        Instant start = Instant.now().plus(Duration.ofHours(3));
         Show show = showRepository.save(new Show(event, hall, start, start.plus(Duration.ofHours(3)), price));
 
         List<ShowSeat> showSeats = seats.stream().map(s -> new ShowSeat(show, s, price)).toList();
