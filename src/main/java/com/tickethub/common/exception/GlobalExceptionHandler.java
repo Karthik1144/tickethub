@@ -4,12 +4,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.net.URI;
 import java.time.Instant;
@@ -18,25 +24,30 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+        Map<String, String> fields = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(f -> f.getField(),
+                                          f -> f.getDefaultMessage() == null ? "invalid" : f.getDefaultMessage(),
+                                          (a, b) -> a, LinkedHashMap::new));
+        HttpServletRequest servletRequest = request instanceof ServletWebRequest swr ? swr.getRequest() : null;
+        ProblemDetail pd = base(ErrorCode.VALIDATION_FAILED, "Request contains invalid fields", servletRequest);
+        pd.setProperty("fields", fields);
+        return new ResponseEntity<>(pd, headers, ErrorCode.VALIDATION_FAILED.getStatus());
+    }
 
     @ExceptionHandler(ApiException.class)
     public ProblemDetail handleApi(ApiException ex, HttpServletRequest request) {
         ProblemDetail pd = base(ex.getErrorCode(), ex.getMessage(), request);
         ex.getProperties().forEach(pd::setProperty);
-        return pd;
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        Map<String, String> fields = ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(f -> f.getField(),
-                                          f -> f.getDefaultMessage() == null ? "invalid" : f.getDefaultMessage(),
-                                          (a, b) -> a, LinkedHashMap::new));
-        ProblemDetail pd = base(ErrorCode.VALIDATION_FAILED, "Request contains invalid fields", request);
-        pd.setProperty("fields", fields);
         return pd;
     }
 

@@ -8,6 +8,7 @@ import com.tickethub.booking.repository.BookingRepository;
 import com.tickethub.booking.service.BookingService;
 import com.tickethub.booking.service.HoldExpiryScheduler;
 import com.tickethub.catalogue.domain.Show;
+import com.tickethub.catalogue.repository.ShowRepository;
 import com.tickethub.common.exception.ApiException;
 import com.tickethub.common.exception.ErrorCode;
 import com.tickethub.payment.domain.PaymentStatus;
@@ -44,6 +45,7 @@ class BookingLifecycleTest extends AbstractIntegrationTest {
     @Autowired ShowSeatRepository showSeatRepository;
     @Autowired HoldExpiryScheduler scheduler;
     @Autowired TestDataFactory fixtures;
+    @Autowired ShowRepository showRepository;
 
     @Test
     @DisplayName("TC-SEAT-01 / TC-BOOK-04: paying a held booking confirms it and books the seats")
@@ -172,6 +174,10 @@ class BookingLifecycleTest extends AbstractIntegrationTest {
     @DisplayName("FR-BOOK-07: cancelling a confirmed booking frees the seats and refunds")
     void cancelConfirmedBookingReleasesSeats() {
         Show show = fixtures.showWithSeats(1, 3, new BigDecimal("120.00"));
+        Instant start = Instant.now().plusSeconds(4 * 60 * 60);
+        show.setStartTime(start);
+        show.setEndTime(start.plusSeconds(3 * 60 * 60));
+        showRepository.saveAndFlush(show);
         User user = fixtures.randomUser();
         HoldResponse hold = bookingService.holdSeats(user.getId(), show.getId(),
                 new HoldRequest(fixtures.seatIdsOf(show.getId()).subList(0, 2)));

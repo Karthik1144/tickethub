@@ -55,7 +55,7 @@ public class TestDataFactory {
         return user("user-" + UUID.randomUUID() + "@example.com", Role.USER);
     }
 
-    /** A show in a fresh hall with rows x seatsPerRow AVAILABLE seats, starting in 2 hours. */
+    /** A show in a fresh hall with rows x seatsPerRow AVAILABLE seats, starting safely beyond the cancellation cutoff. */
     @Transactional
     public Show showWithSeats(int rows, int seatsPerRow, BigDecimal price) {
         Venue venue = venueRepository.save(new Venue("Arena " + UUID.randomUUID(), "Vijayawada", "Main road"));
