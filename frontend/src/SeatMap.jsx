@@ -38,7 +38,7 @@ export default function SeatMap({ show, onHeld, loggedIn }) {
           : seat
       )));
       setSelected((current) => current.filter((id) => !update.seatIds.includes(id)));
-    }));
+    });
 
     return unsubscribe;
   }, [show.id]);
